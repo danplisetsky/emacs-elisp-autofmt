@@ -22,9 +22,13 @@
 
 ;; Public variables.
 
-(defgroup elisp-autofmt nil "Configure emacs-lisp auto-formatting." :group 'tools)
+(defgroup elisp-autofmt nil
+  "Configure emacs-lisp auto-formatting."
+  :group 'tools)
 
-(defcustom elisp-autofmt-empty-line-max 2 "The maximum number of blank lines to keep." :type 'int)
+(defcustom elisp-autofmt-empty-line-max 2
+  "The maximum number of blank lines to keep."
+  :type 'int)
 
 (defcustom elisp-autofmt-use-function-defs nil
   "When non nil, generate function definitions for the auto-formatter to use.
@@ -89,7 +93,8 @@ Can be slow!"
                   (format "(%S, %S),\n" arity-min arity-max))))))))
     (insert "}")))
 
-(defun elisp-autofmt--region-impl (stdout-buffer stderr-buffer &optional assume-file-name)
+(defun elisp-autofmt--region-impl
+  (stdout-buffer stderr-buffer &optional assume-file-name)
   "Auto format the current region using temporary STDOUT-BUFFER & STDERR-BUFFER.
 Optional argument ASSUME-FILE-NAME overrides the file name used for this buffer."
 
@@ -130,7 +135,9 @@ Optional argument ASSUME-FILE-NAME overrides the file name used for this buffer.
             "--stdout"
             ;; Follow the 'fill-column' setting.
             (format "--fmt-fill-column=%d" fill-column)
-            (format "--fmt-empty-lines=%d" elisp-autofmt-empty-line-max)
+            (format
+              "--fmt-empty-lines=%d"
+              elisp-autofmt-empty-line-max)
             ;; Not 0 or 1.
             "--exit-code=2")
 
@@ -154,7 +161,8 @@ Optional argument ASSUME-FILE-NAME overrides the file name used for this buffer.
             :stderr stderr-buffer
             :connection-type 'pipe
             :command command-with-args
-            :coding (cons buffer-file-coding-system buffer-file-coding-system)
+            :coding
+            (cons buffer-file-coding-system buffer-file-coding-system)
             :sentinel
             (lambda (_proc _msg)
               (setq sentinel-called t)
@@ -180,7 +188,9 @@ Optional argument ASSUME-FILE-NAME overrides the file name used for this buffer.
         (cond
           ((or (not (eq exit-code 2)) stderr-as-string)
             (unless stderr-as-string
-              (message "elisp-autofmt: error output\n%s" stderr-as-string))
+              (message
+                "elisp-autofmt: error output\n%s"
+                stderr-as-string))
             (message
               "elisp-autofmt: Command %S failed with exit code %d!"
               command-with-args
@@ -206,7 +216,10 @@ Optional argument ASSUME-FILE-NAME overrides the file name used for this buffer.
       (with-temp-buffer
         (setq stderr-buffer (current-buffer))
         (with-current-buffer this-buffer
-          (elisp-autofmt--region-impl stdout-buffer stderr-buffer assume-file-name))))))
+          (elisp-autofmt--region-impl
+            stdout-buffer
+            stderr-buffer
+            assume-file-name))))))
 
 
 ;; ---------------------------------------------------------------------------
@@ -217,7 +230,9 @@ Optional argument ASSUME-FILE-NAME overrides the file name used for this buffer.
   "Auto-format the entire buffer.
 
 Optional argument BUF the buffer to format, otherwise use the current buffer."
-  (with-current-buffer (or buf (current-buffer)) (elisp-autofmt--region)))
+  (interactive)
+  (with-current-buffer (or buf (current-buffer))
+    (elisp-autofmt--region)))
 
 ;;;###autoload
 (defun elisp-autofmt-save-hook-for-this-buffer (&optional force)
@@ -227,7 +242,12 @@ Optional argument FORCE auto-formats the buffer
 even when `.elisp-autofmt' isn't in any of the buffers parent directories."
   (add-hook 'before-save-hook
     (lambda ()
-      (let ((cfg (locate-dominating-file (file-name-directory buffer-file-name) ".elisp-autofmt")))
+      (let
+        (
+          (cfg
+            (locate-dominating-file
+              (file-name-directory buffer-file-name)
+              ".elisp-autofmt")))
         (when (or cfg force)
           (elisp-autofmt-buffer)))
       ;; Continue to save.
