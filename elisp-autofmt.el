@@ -154,7 +154,7 @@ Optional argument ASSUME-FILE-NAME overrides the file name used for this buffer.
             :stderr stderr-buffer
             :connection-type 'pipe
             :command command-with-args
-            :coding (cons default-buffer-file-coding-system default-buffer-file-coding-system)
+            :coding (cons buffer-file-coding-system buffer-file-coding-system)
             :sentinel
             (lambda (_proc _msg)
               (setq sentinel-called t)
